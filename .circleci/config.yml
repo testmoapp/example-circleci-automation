@@ -75,4 +75,3 @@ workflows:
             - build
           context:
             - testmo
-            - npm
