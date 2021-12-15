@@ -1,0 +1,78 @@
+version: 2.1
+
+jobs:
+  build:
+    docker:
+      - image: cimg/node:current
+    steps:
+      - checkout
+
+      # Restore previous node package cache if there is one
+      - restore_cache:
+          key: node-{{ checksum "package-lock.json" }}
+
+      # Install or update packages
+      - run: npm ci
+
+      # Save cache
+      - save_cache:
+          key: node-{{ checksum "package-lock.json" }}
+          paths:
+            - ~/.npm
+
+      # Store project files for the next job
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - project
+
+  test:
+    docker:
+      - image: cimg/node:current
+
+    steps:
+      # Start with the initial build
+      - attach_workspace:
+          at: ~/
+
+      # Install Testmo CLI tool
+      - run: npm install --no-save @testmo/testmo-cli
+
+      # Optionally add a couple of fields such as the git hash and link to the build
+      - run:
+          command: |
+            npx testmo automation:resources:add-field --name git --type string \
+              --value ${CIRCLE_SHA1:0:7} --resources resources.json
+            npx testmo automation:resources:add-link --name build \
+              --url $CIRCLE_BUILD_URL --resources resources.json
+
+      # Run tests and report results to Testmo
+      - run:
+          command: |
+            npx testmo automation:run:submit \
+              --instance $TESTMO_URL \
+              --project-id 1 \
+              --name "Mocha test run" \
+              --source "unit-tests" \
+              --resources resources.json \
+              --results results/*.xml \
+              -- npm run mocha-junit # Note space after --
+
+      # Store test artifacts and results
+      - store_artifacts:
+          path: results
+          destination: test_results
+      - store_test_results:
+          path: results
+
+workflows:
+  version: 2
+  full:
+    jobs:
+      - build
+      - test:
+          requires:
+            - build
+          context:
+            - testmo
+            - npm

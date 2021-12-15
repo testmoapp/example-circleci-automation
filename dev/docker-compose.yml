@@ -1,0 +1,7 @@
+version: '3'
+services:
+  cimg-node:
+    image: cimg/node:current
+    volumes:
+      - ./../:/project
+    working_dir: /project
