@@ -46,6 +46,19 @@ jobs:
             npx testmo automation:resources:add-link --name build \
               --url $CIRCLE_BUILD_URL --resources resources.json
 
+      # Check if the required variables are available
+      - run:
+          command: |
+            if [[ -z "${TESTMO_URL}" ]]; then
+              echo "The TESTMO_URL secret is not defined for this repository"
+              exit 1
+            fi
+
+            if [[ -z "${TESTMO_TOKEN}" ]]; then
+              echo "The TESTMO_TOKEN secret is not defined for this repository"
+              exit 1
+            fi
+
       # Run tests and report results to Testmo
       - run:
           command: |
