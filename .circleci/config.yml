@@ -11,7 +11,7 @@ jobs:
       - restore_cache:
           key: node-{{ checksum "package-lock.json" }}
 
-      # Install or update packages
+      # Skip this line if not installing your own Node.js packages
       - run: npm ci
 
       # Save cache
