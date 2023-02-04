@@ -50,12 +50,12 @@ jobs:
       - run:
           command: |
             if [[ -z "${TESTMO_URL}" ]]; then
-              echo "The TESTMO_URL secret is not defined for this repository"
+              echo "The TESTMO_URL secret is not defined for this project"
               exit 1
             fi
 
             if [[ -z "${TESTMO_TOKEN}" ]]; then
-              echo "The TESTMO_TOKEN secret is not defined for this repository"
+              echo "The TESTMO_TOKEN secret is not defined for this project"
               exit 1
             fi
 
